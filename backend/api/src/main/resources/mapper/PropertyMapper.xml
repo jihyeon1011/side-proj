@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.api.mapper.PropertyMapper">
+    
+    <resultMap id="PropertyResultMap" type="com.example.api.dto.Property">
+        <id property="propertyId" column="property_id"/>
+        <result property="propertyName" column="property_name"/>
+        <result property="address" column="address"/>
+        <result property="minBidPrice" column="min_bid_price"/>
+        <result property="appraisalPrice" column="appraisal_price"/>
+        <result property="bidStartDate" column="bid_start_date"/>
+        <result property="bidEndDate" column="bid_end_date"/>
+        <result property="status" column="status"/>
+        <result property="announceCount" column="announce_count"/>
+        <result property="historyNumbers" column="history_numbers"/>
+        <result property="lastUpdated" column="last_updated"/>
+    </resultMap>
+    
+    <insert id="insertProperty">
+        INSERT INTO property (
+            property_id, property_name, address, min_bid_price, appraisal_price,
+            bid_start_date, bid_end_date, status, announce_count, history_numbers, last_updated
+        ) VALUES (
+            #{propertyId}, #{propertyName}, #{address}, #{minBidPrice}, #{appraisalPrice},
+            #{bidStartDate}, #{bidEndDate}, #{status}, #{announceCount}, #{historyNumbers}, NOW()
+        ) ON DUPLICATE KEY UPDATE
+            property_name = #{propertyName},
+            address = #{address},
+            min_bid_price = #{minBidPrice},
+            appraisal_price = #{appraisalPrice},
+            bid_start_date = #{bidStartDate},
+            bid_end_date = #{bidEndDate},
+            status = #{status},
+            announce_count = #{announceCount},
+            history_numbers = #{historyNumbers},
+            last_updated = NOW()
+    </insert>
+    
+    <select id="findAll" resultMap="PropertyResultMap">
+        SELECT property_id, property_name, address, min_bid_price, appraisal_price,
+               bid_start_date, bid_end_date, status, announce_count, history_numbers, last_updated
+        FROM property
+        ORDER BY last_updated DESC
+    </select>
+    
+    <delete id="deleteAll">
+        DELETE FROM property
+    </delete>
+    
+    <select id="count" resultType="int">
+        SELECT COUNT(*) FROM property
+    </select>
+    
+    <!-- 백업 관련 쿼리 -->
+    <update id="createBackupTable">
+        CREATE TABLE ${backupTableName} LIKE property
+    </update>
+    
+    <update id="copyDataToBackup">
+        INSERT INTO ${backupTableName} SELECT * FROM property
+    </update>
+    
+    <update id="dropBackupTable">
+        DROP TABLE IF EXISTS ${backupTableName}
+    </update>
+    
+    <select id="getBackupTableNames" resultType="string">
+        SELECT table_name FROM information_schema.tables 
+        WHERE table_schema = 'onbid_db' 
+        AND table_name LIKE 'property_backup_%'
+        ORDER BY table_name DESC
+    </select>
+    
+    <select id="getDataHash" resultType="string">
+        SELECT MD5(GROUP_CONCAT(
+            CONCAT(property_id, property_name, address, min_bid_price, appraisal_price, 
+                   bid_start_date, bid_end_date, status, announce_count, history_numbers)
+            ORDER BY property_id
+        )) as data_hash
+        FROM property
+    </select>
+    
+    <!-- 외래키 제어 -->
+    <update id="disableForeignKeyChecks">
+        SET FOREIGN_KEY_CHECKS = 0
+    </update>
+    
+    <update id="enableForeignKeyChecks">
+        SET FOREIGN_KEY_CHECKS = 1
+    </update>
+    
+</mapper>
