@@ -1,39 +1,47 @@
-package com.example.api.service;
+package com.example.onbid.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.web.client.ResourceAccessException;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 
 @Service
-public class OnbidService {
+@Slf4j
+public class OnbidApiService {
 
-    private static final Logger logger = LoggerFactory.getLogger(OnbidService.class);
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate;
+    
+    public OnbidApiService() {
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(10000);
+        factory.setReadTimeout(30000);
+        this.restTemplate = new RestTemplate(factory);
+    }
     
     @Value("${serviceKey}")
     private String serviceKey;
 
-    public String getOnbidData() {
-        logger.info("Using Service Key: {}", serviceKey);
+    public String fetchOnbidData() {
+        if (serviceKey == null || serviceKey.trim().isEmpty() || "YOUR_SERVICE_KEY_HERE".equals(serviceKey)) {
+            log.error("Service Key가 설정되지 않았습니다.");
+            throw new RuntimeException("Service Key가 설정되지 않았습니다.");
+        }
+        
+        log.info("Using Service Key: {}...", serviceKey.substring(0, Math.min(10, serviceKey.length())));
         
         StringBuilder allData = new StringBuilder();
         allData.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?><response><body><items>");
         
-        // 5페이지까지 가져오기 (최대 500건)
         for (int page = 1; page <= 5; page++) {
             String url = "http://openapi.onbid.co.kr/openapi/services/KamcoPblsalThingInquireSvc/getKamcoPbctCltrList" +
                     "?serviceKey=" + serviceKey +
                     "&numOfRows=100&pageNo=" + page + "&DPSL_MTD_CD=0001&CTGR_HIRK_ID=10000&CTGR_HIRK_ID_MID=10100&SIDO=경상북도";
             
-            logger.info("OnBid API URL (Page {}): {}", page, url);
-            
             try {
                 String response = restTemplate.getForObject(url, String.class);
-                logger.info("API Response (first 500 chars): {}", response != null ? response.substring(0, Math.min(500, response.length())) : "null");
                 
-                // XML에서 item 데이터만 추출
                 if (response != null && response.contains("<item>")) {
                     int startIdx = response.indexOf("<item>");
                     int endIdx = response.lastIndexOf("</item>") + 7;
@@ -42,18 +50,18 @@ public class OnbidService {
                         allData.append(items);
                     }
                 } else {
-                    logger.info("Page {} has no more data", page);
                     break;
                 }
+            } catch (ResourceAccessException e) {
+                log.error("OnBid API 연결 타임아웃 on page {}: {}", page, e.getMessage());
+                throw new RuntimeException("OnBid API 연결 타임아웃: " + e.getMessage());
             } catch (Exception e) {
-                logger.error("OnBid API Error on page {}: {}", page, e.getMessage());
-                break;
+                log.error("OnBid API Error on page {}: {}", page, e.getMessage());
+                throw new RuntimeException("OnBid API 호출 실패: " + e.getMessage());
             }
         }
         
         allData.append("</items></body></response>");
-        String result = allData.toString();
-        logger.info("Total combined data length: {}", result.length());
-        return result;
+        return allData.toString();
     }
 }

@@ -1,6 +1,6 @@
-package com.example.api.mapper;
+package com.example.onbid.mapper;
 
-import com.example.api.dto.Property;
+import com.example.onbid.dto.Property;
 import org.apache.ibatis.annotations.Mapper;
 import java.util.List;
 

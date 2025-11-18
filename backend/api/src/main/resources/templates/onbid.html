@@ -22,7 +22,12 @@
             <a href="/refresh" style="background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; text-decoration: none; float: right; display: inline-block;">데이터 새로고침</a>
         </div>
         
-        <div th:if="${#lists.isEmpty(items)}" class="no-data">
+        <div th:if="${error != null}" class="no-data" style="color: red;">
+            <h3 th:text="${error}">오류 메시지</h3>
+            <p>데이터베이스 연결을 확인해주세요.</p>
+        </div>
+        
+        <div th:if="${error == null and #lists.isEmpty(items)}" class="no-data">
             <h3>조회된 경매 정보가 없습니다.</h3>
         </div>
         

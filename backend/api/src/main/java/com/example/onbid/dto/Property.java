@@ -1,4 +1,4 @@
-package com.example.api.dto;
+package com.example.onbid.dto;
 
 import lombok.Data;
 import java.time.LocalDateTime;
