@@ -21,12 +21,12 @@ public class AuthService {
         }
     }
     
-    public String processRegister(String username, String password, RedirectAttributes redirectAttributes) {
-        if (userService.register(username, password)) {
+    public String processRegister(String name, String email, String phone, String username, String password, RedirectAttributes redirectAttributes) {
+        if (userService.register(name, email, phone, username, password)) {
             redirectAttributes.addFlashAttribute("success", "회원가입이 완료되었습니다.");
             return "redirect:/login";
         } else {
-            redirectAttributes.addFlashAttribute("error", "이미 존재하는 아이디입니다.");
+            redirectAttributes.addFlashAttribute("error", "이미 존재하는 아이디, 이메일 또는 전화번호입니다.");
             return "redirect:/register";
         }
     }

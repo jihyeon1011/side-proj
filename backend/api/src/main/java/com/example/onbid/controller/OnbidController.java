@@ -60,9 +60,10 @@ public class OnbidController {
     }
     
     @PostMapping("/register")
-    public String register(@RequestParam String username, @RequestParam String password, 
+    public String register(@RequestParam String name, @RequestParam String email, @RequestParam String phone,
+                          @RequestParam String username, @RequestParam String password, 
                           RedirectAttributes redirectAttributes) {
-        return authService.processRegister(username, password, redirectAttributes);
+        return authService.processRegister(name, email, phone, username, password, redirectAttributes);
     }
     
     @GetMapping("/logout")

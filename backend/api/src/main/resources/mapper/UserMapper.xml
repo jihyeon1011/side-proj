@@ -4,20 +4,41 @@
     
     <resultMap id="UserResultMap" type="com.example.onbid.dto.User">
         <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="email" column="email"/>
+        <result property="phone" column="phone"/>
         <result property="username" column="username"/>
         <result property="password" column="password"/>
+        <result property="createdAt" column="created_at"/>
     </resultMap>
     
     <insert id="insertUser">
-        INSERT INTO users (username, password) VALUES (#{username}, #{password})
+        INSERT INTO users (name, email, phone, username, password, created_at) 
+        VALUES (#{name}, #{email}, #{phone}, #{username}, #{password}, NOW())
     </insert>
     
     <select id="findByUsername" resultMap="UserResultMap">
-        SELECT id, username, password FROM users WHERE username = #{username}
+        SELECT id, name, email, phone, username, password, created_at FROM users WHERE username = #{username}
+    </select>
+    
+    <select id="findByEmail" resultMap="UserResultMap">
+        SELECT id, name, email, phone, username, password, created_at FROM users WHERE email = #{email}
+    </select>
+    
+    <select id="findByPhone" resultMap="UserResultMap">
+        SELECT id, name, email, phone, username, password, created_at FROM users WHERE phone = #{phone}
     </select>
     
     <select id="existsByUsername" resultType="boolean">
         SELECT COUNT(*) > 0 FROM users WHERE username = #{username}
+    </select>
+    
+    <select id="existsByEmail" resultType="boolean">
+        SELECT COUNT(*) > 0 FROM users WHERE email = #{email}
+    </select>
+    
+    <select id="existsByPhone" resultType="boolean">
+        SELECT COUNT(*) > 0 FROM users WHERE phone = #{phone}
     </select>
     
 </mapper>
