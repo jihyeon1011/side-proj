@@ -12,6 +12,7 @@
         th { background: #f8f9fa; font-weight: bold; }
         .price { color: #e74c3c; font-weight: bold; }
         .no-data { text-align: center; padding: 40px; }
+
     </style>
 </head>
 <body>
@@ -19,7 +20,14 @@
         <div class="header">
             <h1>OnBid 경매 정보 조회</h1>
             <p>경상북도 부동산 경매 정보 (총 <span th:text="${dataCount}"></span>건)</p>
-            <a href="/refresh" style="background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; text-decoration: none; float: right; display: inline-block;">데이터 새로고침</a>
+            <div style="float: right;">
+                <span th:if="${session.username}" style="margin-right: 10px;">환영합니다, <span th:text="${session.username}"></span>님! 
+                    <a href="/wishlist" style="color: #28a745; margin-right: 10px;">내 관심목록</a>
+                    <a href="/logout" style="color: #dc3545;">로그아웃</a>
+                </span>
+                <span th:unless="${session.username}" style="margin-right: 10px;"><a href="/login">로그인</a></span>
+                <a href="/refresh" style="background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; text-decoration: none; display: inline-block;">데이터 새로고침</a>
+            </div>
         </div>
         
         <div th:if="${error != null}" class="no-data" style="color: red;">
@@ -43,6 +51,7 @@
                     <th>입찰마감일시</th>
                     <th>상태</th>
                     <th>공고건수</th>
+                    <th th:if="${isLoggedIn}">관심등록</th>
                 </tr>
             </thead>
             <tbody>
@@ -56,6 +65,16 @@
                     <td th:text="${item['입찰마감일시']}"></td>
                     <td th:text="${item['물건상태']}"></td>
                     <td th:text="${item['공고건수']}"></td>
+                    <td th:if="${isLoggedIn}">
+                        <button th:if="${!#lists.contains(userWishlist, item['물건번호'])}" 
+                                onclick="toggleWishlist(this, 'add')" 
+                                th:data-property-id="${item['물건번호']}"
+                                style="background: #28a745; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;">추가</button>
+                        <button th:if="${#lists.contains(userWishlist, item['물건번호'])}" 
+                                onclick="toggleWishlist(this, 'remove')" 
+                                th:data-property-id="${item['물건번호']}"
+                                style="background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;">삭제</button>
+                    </td>
                 </tr>
             </tbody>
         </table>
@@ -64,5 +83,36 @@
             <a href="/">홈으로 돌아가기</a>
         </div>
     </div>
+
+    <script th:if="${isLoggedIn}">
+        function toggleWishlist(button, action) {
+            const propertyId = button.getAttribute('data-property-id');
+            
+            fetch('/wishlist/' + action, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'propertyId=' + propertyId
+            })
+            .then(response => response.text())
+            .then(result => {
+                if (result === 'success') {
+                    if (action === 'add') {
+                        button.textContent = '삭제';
+                        button.style.background = '#dc3545';
+                        button.onclick = function() { toggleWishlist(this, 'remove'); };
+                    } else {
+                        button.textContent = '추가';
+                        button.style.background = '#28a745';
+                        button.onclick = function() { toggleWishlist(this, 'add'); };
+                    }
+                } else if (result === 'login_required') {
+                    alert('로그인이 필요합니다.');
+                }
+            });
+        }
+    </script>
+
 </body>
 </html>

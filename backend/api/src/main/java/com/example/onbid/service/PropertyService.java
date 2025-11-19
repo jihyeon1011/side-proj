@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.stream.Collectors;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.ui.Model;
 
 @Service
 @RequiredArgsConstructor
@@ -240,6 +242,38 @@ public class PropertyService {
         return result;
     }
 
+    public String processRefresh(org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+        try {
+            refreshData();
+            redirectAttributes.addFlashAttribute("success", "데이터 새로고침 완료");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "새로고침 실패: " + e.getMessage());
+        }
+        return "redirect:/onbid";
+    }
+    
+    public String processDetail(String propertyId, org.springframework.ui.Model model) {
+        Map<String, String> property = getPropertyDetail(propertyId);
+        if (property.isEmpty()) {
+            model.addAttribute("error", "해당 물건을 찾을 수 없습니다.");
+        } else {
+            model.addAttribute("property", property);
+        }
+        return "detail";
+    }
+    
+    public String processOnbidPage(org.springframework.ui.Model model) {
+        Map<String, Object> pageData = getOnbidPageData();
+        
+        model.addAttribute("items", pageData.get("items"));
+        model.addAttribute("dataCount", pageData.get("dataCount"));
+        if (pageData.containsKey("error")) {
+            model.addAttribute("error", pageData.get("error"));
+        }
+        
+        return "onbid";
+    }
+    
     public Map<String, Object> refreshDataApi() {
         try {
             refreshData();

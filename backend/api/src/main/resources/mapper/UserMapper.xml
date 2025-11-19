@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.onbid.mapper.UserMapper">
+    
+    <resultMap id="UserResultMap" type="com.example.onbid.dto.User">
+        <id property="id" column="id"/>
+        <result property="username" column="username"/>
+        <result property="password" column="password"/>
+    </resultMap>
+    
+    <insert id="insertUser">
+        INSERT INTO users (username, password) VALUES (#{username}, #{password})
+    </insert>
+    
+    <select id="findByUsername" resultMap="UserResultMap">
+        SELECT id, username, password FROM users WHERE username = #{username}
+    </select>
+    
+    <select id="existsByUsername" resultType="boolean">
+        SELECT COUNT(*) > 0 FROM users WHERE username = #{username}
+    </select>
+    
+</mapper>

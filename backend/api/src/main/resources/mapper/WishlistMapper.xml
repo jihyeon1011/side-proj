@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.onbid.mapper.WishlistMapper">
+
+    <insert id="insertWishlist" parameterType="com.example.onbid.dto.Wishlist">
+        INSERT INTO wishlist (username, property_id) VALUES (#{username}, #{propertyId})
+    </insert>
+
+    <delete id="deleteWishlist">
+        DELETE FROM wishlist WHERE username = #{param1} AND property_id = #{param2}
+    </delete>
+
+    <select id="existsWishlist" resultType="boolean">
+        SELECT COUNT(*) > 0 FROM wishlist WHERE username = #{param1} AND property_id = #{param2}
+    </select>
+
+    <select id="findPropertyIdsByUsername" resultType="string">
+        SELECT property_id FROM wishlist WHERE username = #{username}
+    </select>
+
+</mapper>
