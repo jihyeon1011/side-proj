@@ -43,5 +43,16 @@ public class OnbidController {
         return "redirect:/onbid";
     }
     
+    @GetMapping("/detail/{propertyId}")
+    public String propertyDetail(@PathVariable String propertyId, Model model) {
+        Map<String, String> property = propertyService.getPropertyDetail(propertyId);
+        if (property.isEmpty()) {
+            model.addAttribute("error", "해당 물건을 찾을 수 없습니다.");
+        } else {
+            model.addAttribute("property", property);
+        }
+        return "detail";
+    }
+    
 
 }

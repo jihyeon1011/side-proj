@@ -81,7 +81,6 @@ public class XmlParserService {
                     itemData.put("물건이력번호", getElementValue(item, "CLTR_HSTR_NO"));
                     itemData.put("물건명", getElementValue(item, "CLTR_NM"));
                     itemData.put("물건소재지", getElementValue(item, "LDNM_ADRS"));
-                    itemData.put("도로명주소", getElementValue(item, "NMRD_ADRS"));
                     itemData.put("처분방식", getElementValue(item, "DPSL_MTD_NM"));
                     itemData.put("입찰방식", getElementValue(item, "BID_MTD_NM"));
                     itemData.put("최저입찰가", formatPrice(getElementValue(item, "MIN_BID_PRC")));

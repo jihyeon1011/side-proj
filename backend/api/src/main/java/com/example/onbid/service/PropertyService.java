@@ -34,13 +34,19 @@ public class PropertyService {
             property.setPropertyId(item.get("물건번호"));
             property.setPropertyName(item.get("물건명"));
             property.setAddress(item.get("물건소재지"));
+            property.setDisposalMethod(item.get("처분방식"));
+            property.setBidMethod(item.get("입찰방식"));
             property.setMinBidPrice(item.get("최저입찰가"));
             property.setAppraisalPrice(item.get("감정가"));
+            property.setMinBidRate(item.get("최저입찰가율"));
             property.setBidStartDate(item.get("입찰시작일시"));
             property.setBidEndDate(item.get("입찰마감일시"));
             property.setStatus(item.get("물건상태"));
             property.setAnnounceCount(item.get("공고건수"));
             property.setHistoryNumbers(item.get("이력번호들"));
+            property.setFailedBidCount(item.get("유찰횟수"));
+            property.setViewCount(item.get("조회수"));
+            property.setDetailInfo(item.get("물건상세정보"));
             
             propertyMapper.insertProperty(property);
         }
@@ -185,18 +191,24 @@ public class PropertyService {
     
     // 데이터 변환
     private Map<String, String> propertyToMap(Property property) {
-        return Map.of(
-            "물건번호", property.getPropertyId() != null ? property.getPropertyId() : "",
-            "물건명", property.getPropertyName() != null ? property.getPropertyName() : "",
-            "물건소재지", property.getAddress() != null ? property.getAddress() : "",
-            "최저입찰가", property.getMinBidPrice() != null ? property.getMinBidPrice() : "",
-            "감정가", property.getAppraisalPrice() != null ? property.getAppraisalPrice() : "",
-            "입찰시작일시", property.getBidStartDate() != null ? property.getBidStartDate() : "",
-            "입찰마감일시", property.getBidEndDate() != null ? property.getBidEndDate() : "",
-            "물건상태", property.getStatus() != null ? property.getStatus() : "",
-            "공고건수", property.getAnnounceCount() != null ? property.getAnnounceCount() : "",
-            "이력번호들", property.getHistoryNumbers() != null ? property.getHistoryNumbers() : ""
-        );
+        Map<String, String> map = new HashMap<>();
+        map.put("물건번호", property.getPropertyId() != null ? property.getPropertyId() : "");
+        map.put("물건명", property.getPropertyName() != null ? property.getPropertyName() : "");
+        map.put("물건소재지", property.getAddress() != null ? property.getAddress() : "");
+        map.put("처분방식", property.getDisposalMethod() != null ? property.getDisposalMethod() : "");
+        map.put("입찰방식", property.getBidMethod() != null ? property.getBidMethod() : "");
+        map.put("최저입찰가", property.getMinBidPrice() != null ? property.getMinBidPrice() : "");
+        map.put("감정가", property.getAppraisalPrice() != null ? property.getAppraisalPrice() : "");
+        map.put("최저입찰가율", property.getMinBidRate() != null ? property.getMinBidRate() : "");
+        map.put("입찰시작일시", property.getBidStartDate() != null ? property.getBidStartDate() : "");
+        map.put("입찰마감일시", property.getBidEndDate() != null ? property.getBidEndDate() : "");
+        map.put("물건상태", property.getStatus() != null ? property.getStatus() : "");
+        map.put("공고건수", property.getAnnounceCount() != null ? property.getAnnounceCount() : "");
+        map.put("이력번호들", property.getHistoryNumbers() != null ? property.getHistoryNumbers() : "");
+        map.put("유찰횟수", property.getFailedBidCount() != null ? property.getFailedBidCount() : "");
+        map.put("조회수", property.getViewCount() != null ? property.getViewCount() : "");
+        map.put("물건상세정보", property.getDetailInfo() != null ? property.getDetailInfo() : "");
+        return map;
     }
     
     // 컨트롤러 위임 메서드들
@@ -207,19 +219,8 @@ public class PropertyService {
             List<Property> properties = getAllProperties();
             
             if (properties.isEmpty()) {
-                log.info("데이터가 비어있어 API에서 데이터를 가져옵니다.");
-                try {
-                    refreshData();
-                    properties = getAllProperties();
-                    log.info("데이터 새로고침 완료: {}건", properties.size());
-                } catch (RuntimeException e) {
-                    log.error("데이터 새로고침 실패: {}", e.getMessage());
-                    result.put("items", List.of());
-                    result.put("dataCount", 0);
-                    result.put("error", "API 데이터 로드 실패: " + e.getMessage() + 
-                        "\n\nService Key가 올바르게 설정되었는지 application.properties를 확인해주세요.");
-                    return result;
-                }
+                refreshData();
+                properties = getAllProperties();
             }
             
             List<Map<String, String>> items = properties.stream()
@@ -230,7 +231,7 @@ public class PropertyService {
             result.put("dataCount", getDataCount());
             
         } catch (Exception e) {
-            log.error("데이터 로드 중 예상치 못한 오류: {}", e.getMessage(), e);
+            log.error("데이터 로드 실패: {}", e.getMessage());
             result.put("items", List.of());
             result.put("dataCount", 0);
             result.put("error", "데이터 로드 실패: " + e.getMessage());
@@ -238,7 +239,6 @@ public class PropertyService {
         
         return result;
     }
-    
 
     public Map<String, Object> refreshDataApi() {
         try {
@@ -256,6 +256,16 @@ public class PropertyService {
             return Map.of("success", true, "backups", backups);
         } catch (Exception e) {
             return Map.of("success", false, "message", "백업 목록 조회 실패: " + e.getMessage());
+        }
+    }
+    
+    public Map<String, String> getPropertyDetail(String propertyId) {
+        try {
+            Property property = propertyMapper.findByPropertyId(propertyId);
+            return property != null ? propertyToMap(property) : Map.of();
+        } catch (Exception e) {
+            log.error("상세 정보 조회 실패: {}", e.getMessage());
+            return Map.of();
         }
     }
 }

@@ -47,7 +47,7 @@
             </thead>
             <tbody>
                 <tr th:each="item : ${items}">
-                    <td th:text="${item['물건번호']}"></td>
+                    <td><a th:href="@{/detail/{id}(id=${item['물건번호']})}" th:text="${item['물건번호']}" style="color: #007bff; text-decoration: none;"></a></td>
                     <td th:text="${item['물건명']}"></td>
                     <td th:text="${item['물건소재지']}"></td>
                     <td class="price" th:text="${item['최저입찰가']}"></td>

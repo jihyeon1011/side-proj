@@ -6,41 +6,64 @@
         <id property="propertyId" column="property_id"/>
         <result property="propertyName" column="property_name"/>
         <result property="address" column="address"/>
+        <result property="disposalMethod" column="disposal_method"/>
+        <result property="bidMethod" column="bid_method"/>
         <result property="minBidPrice" column="min_bid_price"/>
         <result property="appraisalPrice" column="appraisal_price"/>
+        <result property="minBidRate" column="min_bid_rate"/>
         <result property="bidStartDate" column="bid_start_date"/>
         <result property="bidEndDate" column="bid_end_date"/>
         <result property="status" column="status"/>
         <result property="announceCount" column="announce_count"/>
         <result property="historyNumbers" column="history_numbers"/>
+        <result property="failedBidCount" column="failed_bid_count"/>
+        <result property="viewCount" column="view_count"/>
+        <result property="detailInfo" column="detail_info"/>
         <result property="lastUpdated" column="last_updated"/>
     </resultMap>
     
     <insert id="insertProperty">
         INSERT INTO property (
-            property_id, property_name, address, min_bid_price, appraisal_price,
-            bid_start_date, bid_end_date, status, announce_count, history_numbers, last_updated
+            property_id, property_name, address, disposal_method, bid_method,
+            min_bid_price, appraisal_price, min_bid_rate, bid_start_date, bid_end_date, 
+            status, announce_count, history_numbers, failed_bid_count, view_count, detail_info, last_updated
         ) VALUES (
-            #{propertyId}, #{propertyName}, #{address}, #{minBidPrice}, #{appraisalPrice},
-            #{bidStartDate}, #{bidEndDate}, #{status}, #{announceCount}, #{historyNumbers}, NOW()
+            #{propertyId}, #{propertyName}, #{address}, #{disposalMethod}, #{bidMethod},
+            #{minBidPrice}, #{appraisalPrice}, #{minBidRate}, #{bidStartDate}, #{bidEndDate}, 
+            #{status}, #{announceCount}, #{historyNumbers}, #{failedBidCount}, #{viewCount}, #{detailInfo}, NOW()
         ) ON DUPLICATE KEY UPDATE
             property_name = #{propertyName},
             address = #{address},
+            disposal_method = #{disposalMethod},
+            bid_method = #{bidMethod},
             min_bid_price = #{minBidPrice},
             appraisal_price = #{appraisalPrice},
+            min_bid_rate = #{minBidRate},
             bid_start_date = #{bidStartDate},
             bid_end_date = #{bidEndDate},
             status = #{status},
             announce_count = #{announceCount},
             history_numbers = #{historyNumbers},
+            failed_bid_count = #{failedBidCount},
+            view_count = #{viewCount},
+            detail_info = #{detailInfo},
             last_updated = NOW()
     </insert>
     
     <select id="findAll" resultMap="PropertyResultMap">
-        SELECT property_id, property_name, address, min_bid_price, appraisal_price,
-               bid_start_date, bid_end_date, status, announce_count, history_numbers, last_updated
+        SELECT property_id, property_name, address, disposal_method, bid_method,
+               min_bid_price, appraisal_price, min_bid_rate, bid_start_date, bid_end_date, 
+               status, announce_count, history_numbers, failed_bid_count, view_count, detail_info, last_updated
         FROM property
         ORDER BY last_updated DESC
+    </select>
+    
+    <select id="findByPropertyId" resultMap="PropertyResultMap">
+        SELECT property_id, property_name, address, disposal_method, bid_method,
+               min_bid_price, appraisal_price, min_bid_rate, bid_start_date, bid_end_date, 
+               status, announce_count, history_numbers, failed_bid_count, view_count, detail_info, last_updated
+        FROM property
+        WHERE property_id = #{propertyId}
     </select>
     
     <delete id="deleteAll">
@@ -68,7 +91,7 @@
         SELECT table_name FROM information_schema.tables 
         WHERE table_schema = 'onbid_db' 
         AND table_name LIKE 'property_backup_%'
-        ORDER BY table_name DESC
+        ORDER BY create_time DESC
     </select>
     
     <select id="getDataHash" resultType="string">

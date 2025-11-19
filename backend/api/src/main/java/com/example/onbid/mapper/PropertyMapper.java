@@ -8,6 +8,7 @@ import java.util.List;
 public interface PropertyMapper {
     void insertProperty(Property property);
     List<Property> findAll();
+    Property findByPropertyId(String propertyId);
     void deleteAll();
     int count();
     
