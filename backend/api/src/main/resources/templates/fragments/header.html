@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="header">
+    <style>
+        .header {
+            width: 100%;
+            height: 60px;
+            background: #ffffff;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            box-sizing: border-box;
+        }
+
+        .header .logo {
+            font-size: 20px;
+            font-weight: bold;
+            color: #1e293b;
+        }
+
+        .header .user-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            color: #334155;
+        }
+
+        .header .user-area a {
+            text-decoration: none;
+            color: #2563eb;
+            padding: 6px 10px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+        .header .user-area a:hover {
+            background: #e0e7ff;
+        }
+    </style>
+
+    <div class="header">
+        <div class="logo">OnBid</div>
+
+        <div class="user-area">
+            <!-- 로그인 상태 -->
+            <span th:if="${session.username}">
+                <b th:text="${session.username}"></b> 님
+                <a href="/logout">로그아웃</a>
+            </span>
+
+            <!-- 비로그인 상태 -->
+            <span th:unless="${session.username}">
+                <a href="/login">로그인</a>
+                <a href="/register">회원가입</a>
+            </span>
+        </div>
+    </div>
+</div>
+</body>
+</html>
